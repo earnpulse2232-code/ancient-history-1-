@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#f8fafc">
+    <title>History - Stone Age (Lecture 1)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-main: #f8fafc; --bg-card: #ffffff; --primary: #2563eb; --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff; --text-dark: #0f172a; --text-muted: #64748b; --border-color: #e2e8f0;
+            --green: #10b981; --green-light: #ecfdf5; --red: #ef4444; --red-light: #fef2f2;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08);
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-main); color: var(--text-dark); min-height: 100dvh; font-size: 15px; line-height: 1.5; overflow-x: hidden; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+        .hidden { display: none !important; }
+        .start-screen { position: fixed; inset: 0; background: var(--bg-main); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .start-card { width: 100%; max-width: 440px; background: var(--bg-card); border-radius: 24px; padding: 36px 28px; box-shadow: var(--shadow-lg); text-align: center; border: 1px solid var(--border-color); }
+        .brand-icon { width: 60px; height: 60px; background: var(--primary-light); color: var(--primary); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px; }
+        .start-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .start-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+        .mode-btn { display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px; background: #fff; border: 1.5px solid var(--border-color); border-radius: 16px; text-align: left; margin-bottom: 12px; transition: all 0.2s ease; }
+        .mode-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+        .mode-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+        .mode-icon.quiz { background: #dbeafe; color: #2563eb; }
+        .mode-icon.test { background: #d1fae5; color: #059669; }
+        .mode-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+        .mode-info-txt { font-size: 12px; color: var(--text-muted); }
+        .quiz-app { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        .quiz-header { flex-shrink: 0; background: #fff; border-bottom: 1px solid var(--border-color); padding: 12px 18px; }
+        .quiz-header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .hdr-brand { font-weight: 700; font-size: 15px; }
+        .hdr-timer { padding: 6px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 20px; font-family: monospace; font-weight: 700; color: var(--primary); }
+        .hdr-btn { width: 38px; height: 38px; border-radius: 10px; background: #fff; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; }
+        .quiz-main { flex: 1; overflow-y: auto; max-width: 900px; width: 100%; margin: 0 auto; padding: 24px 16px; }
+        .q-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-sm); }
+        .q-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .q-num-badge { padding: 5px 12px; background: var(--primary-light); color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .lang-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border-color); font-size: 12px; font-weight: 600; background: #fff; display: inline-flex; align-items: center; gap: 6px; }
+        .q-text { font-size: 16px; font-weight: 600; line-height: 1.6; margin-bottom: 22px; white-space: pre-line; }
+        .opts { display: flex; flex-direction: column; gap: 11px; }
+        .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: #fff; border: 1.5px solid var(--border-color); border-radius: 14px; cursor: pointer; transition: all 0.15s ease; }
+        .opt:hover:not(.locked) { border-color: var(--primary); background: #f8fafc; }
+        .opt.selected { border-color: var(--primary); background: var(--primary-light); }
+        .opt.correct { border-color: var(--green); background: var(--green-light); }
+        .opt.wrong { border-color: var(--red); background: var(--red-light); }
+        .opt.locked { cursor: default; }
+        .opt-letter { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+        .opt.selected .opt-letter { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .opt.correct .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+        .opt.wrong .opt-letter { background: var(--red); color: #fff; border-color: var(--red); }
+        .opt-text { flex: 1; font-weight: 600; }
+        .opt-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+        .opt.correct .opt-tag { background: var(--green); color: #fff; }
+        .opt.wrong .opt-tag { background: var(--red); color: #fff; }
+        .sol-box { margin-top: 20px; padding: 16px; background: #f8fafc; border-left: 4px solid var(--primary); border-radius: 12px; }
+        .sol-head { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 8px; }
+        .quiz-nav { flex-shrink: 0; background: #fff; border-top: 1px solid var(--border-color); padding: 12px 18px; }
+        .quiz-nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .nav-btn { display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+        .nav-btn.prev { background: #fff; border: 1px solid var(--border-color); }
+        .nav-btn.prev:disabled { opacity: 0.4; cursor: not-allowed; }
+        .nav-btn.submit { background: var(--green-light); color: #065f46; border: 1px solid #a7f3d0; }
+        .nav-btn.next { background: var(--primary); color: #fff; }
+        .palette-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .palette-overlay.open { display: block; }
+        .palette-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: min(340px, 85vw); background: #fff; z-index: 160; display: flex; flex-direction: column; transform: translateX(-100%); transition: transform 0.25s; }
+        .palette-drawer.open { transform: translateX(0); }
+        .pal-head { padding: 18px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
+        .pal-grid { flex: 1; overflow-y: auto; padding: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; align-content: start; }
+        .pal-btn { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+        .pal-btn.answered { background: var(--green); color: #fff; border-color: var(--green); }
+        .pal-btn.current { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 170; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { width: 100%; max-width: 420px; background: #fff; border-radius: 20px; padding: 28px; text-align: center; }
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0 22px; }
+        .modal-stat { background: #f8fafc; border-radius: 12px; padding: 14px; border: 1px solid var(--border-color); }
+        .modal-stat-num { font-size: 24px; font-weight: 800; }
+        .modal-btn { width: 100%; padding: 14px; border-radius: 12px; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .modal-btn.confirm { background: var(--primary); color: #fff; }
+        .modal-btn.cancel { background: #f1f5f9; }
+        .results-screen { position: fixed; inset: 0; background: var(--bg-main); z-index: 180; display: none; overflow-y: auto; padding: 30px 16px 60px; }
+        .results-screen.open { display: block; }
+        .results-box { max-width: 600px; margin: 0 auto; text-align: center; }
+        .res-score-card { background: #0f172a; color: #fff; border-radius: 20px; padding: 28px; margin: 20px 0; }
+        .res-score-val { font-size: 54px; font-weight: 800; }
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .res-item { background: #fff; border-radius: 14px; padding: 16px; border: 1px solid var(--border-color); }
+        .res-item-val { font-size: 22px; font-weight: 700; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: #0f172a; color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 300; opacity: 0; transition: all 0.25s; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-card">
+            <div class="brand-icon"><i class="fas fa-landmark"></i></div>
+            <h1 class="start-title">History - Stone Age</h1>
+            <p class="start-desc">Palaeolithic, Mesolithic & Neolithic Eras (Lecture 1)</p>
+            <button class="mode-btn" onclick="startApp('quiz')">
+                <div class="mode-icon quiz"><i class="fas fa-bolt"></i></div>
+                <div><div class="mode-name">Practice Mode</div><div class="mode-info-txt">Instant correct/wrong answer and explanations.</div></div>
+            </button>
+            <button class="mode-btn" onclick="startApp('test')">
+                <div class="mode-icon test"><i class="fas fa-clock"></i></div>
+                <div><div class="mode-name">Exam Mode</div><div class="mode-info-txt">Mock exam with timer and score summary.</div></div>
+            </button>
+        </div>
+    </div>
+
+    <div class="quiz-app hidden" id="quizApp">
+        <header class="quiz-header">
+            <div class="quiz-header-inner">
+                <button class="hdr-btn" onclick="openPalette()"><i class="fas fa-th-large"></i></button>
+                <div class="hdr-brand">Stone Age - Lecture 1</div>
+                <div class="hdr-timer"><i class="fas fa-stopwatch"></i> <span id="timerText">00:00</span></div>
+            </div>
+        </header>
+
+        <main class="quiz-main" id="quizMain"></main>
+
+        <nav class="quiz-nav" id="quizNav">
+            <div class="quiz-nav-inner">
+                <button class="nav-btn prev" id="prevBtn" onclick="prevQuestion()"><i class="fas fa-arrow-left"></i> Previous</button>
+                <button class="nav-btn submit" onclick="openSubmitModal()"><i class="fas fa-paper-plane"></i> Submit</button>
+                <button class="nav-btn next" id="nextBtn" onclick="nextQuestion()"><span id="nextLabel">Next</span> <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </nav>
+    </div>
+
+    <div class="palette-overlay" id="paletteOverlay" onclick="closePalette()"></div>
+    <aside class="palette-drawer" id="paletteDrawer">
+        <div class="pal-head"><span>Questions</span><button onclick="closePalette()"><i class="fas fa-times"></i></button></div>
+        <div class="pal-grid" id="paletteGrid"></div>
+    </aside>
+
+    <div class="modal-overlay" id="submitModal">
+        <div class="modal-box">
+            <h3>Submit Test?</h3>
+            <div class="modal-stats-grid">
+                <div class="modal-stat"><div class="modal-stat-num" id="modalAttempted" style="color:var(--green)">0</div><div>Attempted</div></div>
+                <div class="modal-stat"><div class="modal-stat-num" id="modalUnattempted" style="color:var(--text-muted)">0</div><div>Unattempted</div></div>
+            </div>
+            <button class="modal-btn confirm" onclick="confirmSubmit()">Yes, Finish</button>
+            <button class="modal-btn cancel" onclick="closeSubmitModal()">Resume</button>
+        </div>
+    </div>
+
+    <div class="results-screen" id="resultsScreen"><div class="results-box" id="resultsInner"></div></div>
+    <div class="toast" id="toast"><span id="toastText"></span></div>
+
+    <script>
+        const QUESTIONS = [
+            {
+                e: "Which innovation correctly illustrates Mesolithic advances in subsistence and technology in India?",
+                h: "भारत में निर्वाह और प्रौद्योगिकी में मेसोलिथिक काल की प्रगति को कौन-सा नवाचार सही रूप से व्यक्त करता है?",
+                oEn: [
+                    "Emergence of polished stone axes associated with settled agricultural villages",
+                    "Use of microlithic tools along with bow-and-arrow and plant-processing implements",
+                    "Manufacture of heavy flake tools similar to Lower Paleolithic hand-axes",
+                    "Adoption of iron tools indicates an early transition to metal-using cultures"
+                ],
+                oHi: [
+                    "स्थायी कृषि गांवों से जुड़ी पॉलिश की हुई पत्थर की कुल्हाड़ियों का उद्भव।",
+                    "धनुष-बाण और फसलों का प्रसंस्करण करने वाले उपकरणों के साथ सूक्ष्मपाषाण काल ​​के औजारों का उपयोग।",
+                    "निम्न पुरापाषाण काल की हाथ की कुल्हाड़ियों के समान भारी परतदार औजारों का निर्माण।",
+                    "लोहे के औजारों का उपयोग धातु-उपयोग करने वाली संस्कृतियों में प्रारंभिक संक्रमण का संकेत देता है।"
+                ],
+                a: 1,
+                sE: "The Mesolithic period is distinguished by composite tools made of geometric microliths, hafted onto wood/bone, alongside hunting weapons like bows and arrows.",
+                sH: "मध्यपाषाण (Mesolithic) काल का प्रमुख लक्षण माइक्रोलिथ (सूक्ष्म पाषाण औजार), तीर-धनुष और पौधों/अनाज को पीसने वाले औजारों का व्यापक उपयोग था।"
+            },
+            {
+                e: "Which human species is associated with the Upper Paleolithic cultural phase?",
+                h: "कौन-सी मानव प्रजाति उच्च पुरापाषाणकालीन (Upper Paleolithic) सांस्कृतिक चरण से संबंधित है?",
+                oEn: [
+                    "Homo erectus populations moving out of Africa",
+                    "Homo neanderthalensis in European and Asian regions",
+                    "Anatomically Modern Homo sapiens across the Old World",
+                    "Denisovan groups settled in mountain environments"
+                ],
+                oHi: [
+                    "अफ्रीका से बाहर जाने वाली होमो इरेक्टस की जनसंख्या",
+                    "यूरोपीय और एशियाई क्षेत्रों में होमो निएंडरथलेसिस",
+                    "प्राचीन विश्व भर में शारीरिक रूप से आधुनिक होमो सेपियंस",
+                    "पर्वतीय वातावरण में बस गया डेनिसोवन समूह"
+                ],
+                a: 2,
+                sE: "The Upper Paleolithic phase coincides with the emergence and global dispersal of anatomically modern humans (Homo sapiens).",
+                sH: "उच्च पुरापाषाण काल का संबंध आधुनिक मानव (होमो सेपियंस / Homo sapiens) के प्रादुर्भाव और विस्तार से है।"
+            },
+            {
+                e: "The ‘Mesolithic Age’ is regarded as a transitional phase because it represents the shift between which two prehistoric periods?",
+                h: "'मध्यपाषाण युग' को एक संक्रमणकालीन चरण माना जाता है क्योंकि यह किन दो प्रागैतिहासिक काल के बीच परिवर्तन को निरूपित करता है?",
+                oEn: [
+                    "Neolithic Age and Chalcolithic Age",
+                    "Bronze Age and Iron Age",
+                    "Palaeolithic Age and Neolithic Age",
+                    "Chalcolithic Age and Iron Age"
+                ],
+                oHi: [
+                    "नवपाषाण युग और ताम्रपाषाणीय युग",
+                    "कांस्य युग और लौह युग",
+                    "पुरापाषाण युग और नवपाषाण युग",
+                    "ताम्रपाषाणीय युग और लौह युग"
+                ],
+                a: 2,
+                sE: "The Mesolithic Age is the intermediate/transitional period between the hunting-gathering Palaeolithic Age and food-producing Neolithic Age.",
+                sH: "मध्यपाषाण काल (Mesolithic Age) पुरापाषाण युग (Palaeolithic) और नवपाषाण युग (Neolithic) के बीच का संक्रमण काल है।"
+            },
+            {
+                e: "Microlithic tools became a characteristic feature during which phase of prehistory in India?",
+                h: "भारत में प्रागैतिहासिक काल के किस चरण के दौरान लघुपाषाणिक उपकरण एक विशिष्ट अभिलक्षण बन गए?",
+                oEn: ["Early Iron Age", "Lower Palaeolithic", "Middle Palaeolithic", "Mesolithic"],
+                oHi: ["प्रारंभिक लौह युग", "निम्न पुरापाषाण काल", "मध्य पुरापाषाण काल", "मध्यपाषाण"],
+                a: 3,
+                sE: "Microliths (tiny, sharp stone tools ranging from 1 to 5 cm) are the hallmark of the Mesolithic culture.",
+                sH: "माइक्रोलिथ (लघुपाषाण उपकरण) मुख्य रूप से मध्यपाषाण काल (Mesolithic Era) की सबसे प्रमुख विशेषता हैं।"
+            },
+            {
+                e: "The earliest evidence of stone tools in India has been found at:",
+                h: "भारत में पत्थर के औजारों का सबसे पहला प्रमाण कहाँ पाया गया था?",
+                oEn: ["Mehrgarh", "Lothal", "Hunsgi Valley", "Attirampakkam"],
+                oHi: ["मेहरगढ़", "लोथल", "हुंसगी घाटी", "अत्तिरामपक्कम"],
+                a: 3,
+                sE: "Attirampakkam near Chennai, Tamil Nadu, has yielded Lower Palaeolithic Acheulian stone tools dating back around 1.5 million years.",
+                sH: "तमिलनाडु के अत्तिरामपक्कम में लगभग 15 लाख वर्ष पुराने निम्न पुरापाषाणकालीन औजार प्राप्त हुए हैं।"
+            },
+            {
+                e: "Which of the following sites has yielded Acheulian, Middle and Upper Palaeolithic and Mesolithic levels?",
+                h: "निम्नलिखित में से किस स्थल से निम्न पुरापाषाण, मध्य और उत्तर पुरापाषाण ​​तथा मध्यपाषाण स्तर के अवशेष प्राप्त हुए हैं?",
+                oEn: [
+                    "Chirki-Nevasa in Maharashtra",
+                    "Adamgarh in Madhya Pradesh",
+                    "Bhimbetka Rock Shelters in Madhya Pradesh",
+                    "Paisra in Munger district, Bihar"
+                ],
+                oHi: [
+                    "महाराष्ट्र में चिरकी-नेवासा",
+                    "मध्य प्रदेश में आदमगढ़",
+                    "मध्य प्रदेश में भीमबेटका शैलाश्रय",
+                    "बिहार के मुंगेर जिले में पैसरा"
+                ],
+                a: 2,
+                sE: "Bhimbetka rock shelters demonstrate an unbroken cultural sequence from Acheulian (Lower Palaeolithic) through Middle & Upper Palaeolithic to Mesolithic periods.",
+                sH: "मध्य प्रदेश की भीमबेटका गुफाओं में निम्न पुरापाषाण (अशूलियन), मध्य पुरापाषाण, उच्च पुरापाषाण और मध्यपाषाण काल का अनवरत क्रम मिलता है।"
+            },
+            {
+                e: "Which of the following sites contains prehistoric paintings ranging from the Mesolithic to the historic period?",
+                h: "निम्नलिखित में से किस स्थल में मध्यपाषाण काल ​​से लेकर ऐतिहासिक काल तक की प्रागैतिहासिक चित्रकारी पाई जाती है?",
+                oEn: ["Hampi", "Nalanda", "Pattadakal", "Bhimbetka"],
+                oHi: ["हम्पी", "नालंदा", "पट्टदकल", "भीमबेटका"],
+                a: 3,
+                sE: "The rock shelters of Bhimbetka (Raisen, MP) preserve rock art spanning from the Upper Palaeolithic and Mesolithic eras into medieval historic times.",
+                sH: "भीमबेटका में मध्यपाषाण काल से लेकर ऐतिहासिक काल तक के सैकड़ों रॉक-कट शैलचित्र मौजूद हैं।"
+            },
+            {
+                e: "Which of the following was NOT an excavated site of the Banas culture?",
+                h: "निम्नलिखित में से कौन-सा बनास संस्कृति का उत्खनन स्थल नहीं था?",
+                oEn: ["Gilund", "Ahar", "Bagor", "Nagda"],
+                oHi: ["गिलुंड", "आहड़", "बागोर", "नागदा"],
+                a: 3,
+                sE: "Nagda belongs primarily to the Malwa Chalcolithic culture in Madhya Pradesh, whereas Ahar, Gilund, and Bagor are situated in the Banas river basin (Rajasthan).",
+                sH: "नागदा मध्य प्रदेश में मालवा संस्कृति का प्रमुख स्थल है, जबकि गिलुंड, आहड़ और बागोर बनास (आहड़) घाटी से जुड़े स्थल हैं।"
+            },
+            {
+                e: "The archaeological site of Langhnaj in Gujarat, known for microlithic tools and evidence of hunting-gathering communities, is associated with which prehistoric cultural phase in India?",
+                h: "गुजरात में लंघनाज का पुरातात्विक स्थल, जो सूक्ष्म पाषाण उपकरणों और शिकार-संग्रहण समुदायों के प्रमाण के लिए जाना जाता है, भारत में किस प्रागैतिहासिक सांस्कृतिक चरण से जुड़ा है?",
+                oEn: ["Chalcolithic culture", "Palaeolithic culture", "Mesolithic culture", "Neolithic culture"],
+                oHi: ["ताम्रपाषाण संस्कृति", "पुरापाषाण संस्कृति", "मध्यपाषाण संस्कृति", "नवपाषाण संस्कृति"],
+                a: 2,
+                sE: "Langhnaj in Mehsana, Gujarat, is a prominent Mesolithic site excavated by H.D. Sankalia, showing geometric microliths, faunal remains, and human burials.",
+                sH: "गुजरात का लंघनाज भारत का एक विख्यात मध्यपाषाणकालीन (Mesolithic) स्थल है जहाँ से माइक्रोलिथ और मानव कंकाल मिले हैं।"
+            },
+            {
+                e: "Akhaj Mesolithic site is found in which state of India?",
+                h: "अखज मध्यपाषाणकालीन स्थल भारत के किस राज्य में स्थित है?",
+                oEn: ["Assam", "Meghalaya", "Gujarat", "Bihar"],
+                oHi: ["असम", "मेघालय", "गुजरात", "बिहार"],
+                a: 2,
+                sE: "Akhaj is a Mesolithic site located in the Mehsana district of Gujarat, situated on sand dunes near Langhnaj.",
+                sH: "अखज मध्यपाषाण स्थल गुजरात राज्य के मेहसाणा जिले में स्थित है।"
+            },
+            {
+                e: "Which technique was primarily used to produce flake tools in India during the Middle Palaeolithic culture?",
+                h: "मध्य पुरापाषाण संस्कृति के दौरान भारत में शल्क उपकरण (flake tools) बनाने के लिए मुख्य रूप से किस तकनीक का उपयोग किया गया था?",
+                oEn: ["Percussion method", "Blade-tool technology", "Levallois technique", "Pressure flaking"],
+                oHi: ["आघात विधि", "ब्लेड-उपकरण प्रौद्योगिकी", "लेवाल्लोइस तकनीक", "दबाव शल्कन"],
+                a: 2,
+                sE: "The Middle Palaeolithic industry (Nevasan culture in India) is dominated by the Levallois or prepared-core technique to produce flakes, points, and scrapers.",
+                sH: "मध्य पुरापाषाण काल में सुव्यवस्थित क्रोड से शल्क निकालने के लिए 'लेवाल्लोइस तकनीक' (Levallois technique) का प्रमुखता से उपयोग किया गया था।"
+            },
+            {
+                e: "Bhimbetka Paleolithic site is located near which river valley of India?",
+                h: "भीमबेटका पुरापाषाण स्थल भारत की किस नदी घाटी के पास स्थित है?",
+                oEn: ["Yamuna", "Narmada", "Ganga", "Satluj"],
+                oHi: ["यमुना", "नर्मदा", "गंगा", "सतलुज"],
+                a: 1,
+                sE: "Bhimbetka is situated in the Raisen district of Madhya Pradesh in the foothills of the Vindhyan Mountains, on the northern fringes of the Narmada valley.",
+                sH: "भीमबेटका विंध्य पर्वतमाला की तलहटी में नर्मदा नदी घाटी के समीप स्थित है।"
+            },
+            {
+                e: "Which of the following periods succeeds the Palaeolithic period?",
+                h: "निम्नलिखित में से कौन सा काल पुरापाषाण काल के बाद आती है?",
+                oEn: ["Chalcolithic", "Mesolithic", "Neolithic", "Iron Age"],
+                oHi: ["ताम्रपाषाण", "मध्यपाषाण", "नवपाषाण", "लौह युग"],
+                a: 1,
+                sE: "The chronological sequence of the Stone Age is Palaeolithic -> Mesolithic -> Neolithic.",
+                sH: "पाषाण काल का सही क्रम है: पुरापाषाण काल (Palaeolithic) -> मध्यपाषाण काल (Mesolithic) -> नवपाषाण काल (Neolithic)।"
+            },
+            {
+                e: "The Kayatha Culture of Chalcolithic period in Ancient India belongs to which of the following states of India?",
+                h: "प्राचीन भारत में चोलोलिथिक काल की कायथा संस्कृति भारत के निम्नलिखित में से किस राज्य से संबंधित है?",
+                oEn: ["Punjab", "Rajasthan", "Madhya Pradesh", "Maharashtra"],
+                oHi: ["पंजाब", "राजस्थान", "मध्य प्रदेश", "महाराष्ट्र"],
+                a: 2,
+                sE: "Kayatha culture (circa 2450–2000 BCE) is an early Chalcolithic culture discovered on the banks of the Kalisindh River (a Chambal tributary) in Madhya Pradesh.",
+                sH: "कायथा संस्कृति मध्य प्रदेश के उज्जैन/मालवा क्षेत्र में कालीसिंध नदी के किनारे स्थित ताम्रपाषाणिक संस्कृति है।"
+            },
+            {
+                e: "Which of the following Neolithic sites yielded the remains of three species of deer (the Barasingha, Gazelle, and Spotted Deer)?",
+                h: "निम्नलिखित में से किस नवपाषाण स्थल से तीन प्रजातियों के हिरणों (बारासिंघा, गजेल और धब्बेदार हिरण) के अवशेष मिले हैं?",
+                oEn: ["Didwana", "Bhimbetka", "Kodekal", "Patne"],
+                oHi: ["दीवाना", "भीमबेटका", "कोडेकल", "पाटवे"],
+                a: 2,
+                sE: "Kodekal, an ash-mound Neolithic site in Shorapur Doab (Karnataka), yielded faunal remains including Barasingha, Gazelle, and Spotted deer.",
+                sH: "कर्नाटक के कोडेकल (Kodekal) नवपाषाणकालीन स्थल से तीन प्रजातियों के हिरणों के अवशेष प्राप्त हुए हैं।"
+            },
+            {
+                e: "Which of the following sites is better known as a Chalcolithic Site?",
+                h: "निम्नलिखित में से कौन-सा स्थल ताम्र पाषाणिक स्थल के रूप में अधिक जाना जाता है?",
+                oEn: ["Kayatha", "Burzahom", "Utnur", "Mehrgarh"],
+                oHi: ["कायथा", "बुर्जहोम", "उटनूर", "मेहरगढ़"],
+                a: 0,
+                sE: "Kayatha is the type-site of the Chalcolithic Kayatha culture, whereas Burzahom and Utnur are Neolithic sites, and Mehrgarh has early Neolithic-to-Chalcolithic strata.",
+                sH: "कायथा मुख्य रूप से अपनी विशिष्ट ताम्रपाषाण संस्कृति (Kayatha Culture) के लिए जाना जाता है।"
+            },
+            {
+                e: "Kupgal, a Neolithic site, is located in __________.",
+                h: "नवपाषाण कालीन स्थल कुपगल किस राज्य में स्थित है?",
+                oEn: ["Telangana", "Andhra Pradesh", "Kerala", "Karnataka"],
+                oHi: ["तेलंगाना", "आंध्र प्रदेश", "केरल", "कर्नाटक"],
+                a: 3,
+                sE: "Kupgal (famous for its ash-mounds and rock bruisings) is located near Bellary in Karnataka.",
+                sH: "कुपगल (Kupgal) कर्नाटक के बेल्लारी जिले में स्थित एक प्रसिद्ध नवपाषाणकालीन राख के टीले (ash-mound) वाला स्थल है।"
+            },
+            {
+                e: "Bhirrana, a Neolithic/early site, is situated in __________ state.",
+                h: "नवपाषाण कालीन स्थल भिरराना किस राज्य में स्थित है?",
+                oEn: ["Rajasthan", "Madhya Pradesh", "Gujarat", "Haryana"],
+                oHi: ["राजस्थान", "मध्य प्रदेश", "गुजरात", "हरियाणा"],
+                a: 3,
+                sE: "Bhirrana is located on the dry beds of the ancient Saraswati/Ghaggar river in Fatehabad district, Haryana.",
+                sH: "भिरराना हरियाणा के फतेहाबाद जिले में घग्गर नदी के किनारे स्थित है।"
+            },
+            {
+                e: "The rock shelters of Bhimbetka are located in which of the following states of India?",
+                h: "भीमबेटका शैलाश्रय, भारत के निम्नलिखित में से किस राज्य में स्थित हैं?",
+                oEn: ["Madhya Pradesh", "Haryana", "Bihar", "Odisha"],
+                oHi: ["मध्य प्रदेश", "हरियाणा", "बिहार", "ओडिशा"],
+                a: 0,
+                sE: "Bhimbetka rock shelters are located in Raisen district of Madhya Pradesh.",
+                sH: "भीमबेटका शैलाश्रय मध्य प्रदेश के रायसेन जिले में स्थित हैं।"
+            },
+            {
+                e: "The Lower Palaeolithic period in India, including the Acheulian phase, spans approximately how many years BP?",
+                h: "भारत में निम्न पुरापाषाण काल, जिसमें अचेतियन चरण भी शामिल है, लगभग कितने वर्ष बीपी तक फैला हुआ है?",
+                oEn: [
+                    "6,00,000–1,50,000 years BP",
+                    "1,65,000–31,000 years BP",
+                    "1,00,000–10,000 years BP",
+                    "40,000–12,000 years"
+                ],
+                oHi: [
+                    "6,00,000-1,50,000 वर्ष बीपी",
+                    "1,65,000-31,000 वर्ष बीपी",
+                    "1,00,000-10,000 वर्ष बीपी",
+                    "40,000-12,000 वर्ष"
+                ],
+                a: 0,
+                sE: "In standard Indian archaeology timelines, the Lower Palaeolithic broadly extends up to around 150,000 years Before Present (BP).",
+                sH: "भारतीय पुरातत्व में निम्न पुरापाषाण काल का समय मोटे तौर पर 6,00,000 से 1,50,000 वर्ष पूर्व (BP) माना जाता है।"
+            },
+            {
+                e: "Bori, which is considered to be one of the earliest Lower Palaeolithic sites, is in which of the following states of India?",
+                h: "बोरी, जिसे पहला लोअर पैलियोलिथिक स्थल माना जाता है, भारत के निम्नलिखित में से किस राज्य में है?",
+                oEn: ["Gujarat", "Arunachal Pradesh", "Tamil Nadu", "Maharashtra"],
+                oHi: ["गुजरात", "अरुणाचल प्रदेश", "तमिलनाडु", "महाराष्ट्र"],
+                a: 3,
+                sE: "Bori is located in Pune district, Maharashtra, on the Kukdi River.",
+                sH: "बोरी पुरातात्विक स्थल महाराष्ट्र के पुणे जिले में कुकड़ी नदी के किनारे स्थित है।"
+            },
+            {
+                e: "Which archaeological site shows pit dwellings and evidence of domesticated dogs buried with masters during the Neolithic period?",
+                h: "कौन सा पुरातात्विक स्थल नवपाषाण काल के दौरान गड्ढे वाले घरों और पालतू कुत्तों के प्रमाण दिखाता है?",
+                oEn: ["Chirand", "Burzahom", "Koldihwa", "Hallur"],
+                oHi: ["चिरंद", "बुर्जहोम", "कोलडिहवा", "हल्लूर"],
+                a: 1,
+                sE: "Burzahom in the Kashmir valley is renowned for underground pit dwellings and graves where dogs were buried with humans.",
+                sH: "कश्मीर का बुर्जहोम गर्त-आवास (pit dwelling) और मालिक के साथ पालतू कुत्ते को दफनाने के साक्ष्यों के लिए प्रसिद्ध है।"
+            },
+            {
+                e: "Which of the following was NOT a reason for the Paleolithic people to move from place to place?",
+                h: "निम्नलिखित में से कौन सा पुरापाषाण काल के लोगों के एक स्थान से दूसरे स्थान पर जाने का कारण नहीं था?",
+                oEn: [
+                    "Failure of crops",
+                    "Resource exhaustion",
+                    "Movement of prey animals",
+                    "Seasonal changes"
+                ],
+                oHi: [
+                    "फसलों की विफलता",
+                    "संसाधन की कमी",
+                    "शिकार जानवरों का आवागमन",
+                    "मौसमी बदलाव"
+                ],
+                a: 0,
+                sE: "Palaeolithic people were nomadic hunter-gatherers and did not practice agriculture. Crop failure became a factor only in the Neolithic period.",
+                sH: "पुरापाषाण काल के लोग कृषि नहीं करते थे, अतः 'फसलों की विफलता' उनके स्थान परिवर्तन का कारण नहीं हो सकती।"
+            },
+            {
+                e: "The Acheulian cultural tradition is primarily identified with which types of advanced and symmetrical stone tools?",
+                h: "अचुलियन सांस्कृतिक परंपरा को मुख्य रूप से किस प्रकार के उन्नत और सममित पत्थर के औजारों से पहचाना जाता है?",
+                oEn: [
+                    "Blades and borers",
+                    "Microliths and scrapers",
+                    "Chisels and adzes",
+                    "Cleavers and hand-axes"
+                ],
+                oHi: [
+                    "ब्लेड और बोरर",
+                    "माइक्रोलिथ और स्क्रैपर्स",
+                    "छेनी और कुल्हाड़ी",
+                    "क्लीवर और हाथ-कुल्हाड़ियां"
+                ],
+                a: 3,
+                sE: "The Acheulian tool tradition is defined by bifacial, pear- or teardrop-shaped hand-axes (bifaces) and cleavers.",
+                sH: "अशूलियन परंपरा की पहचान मुख्य रूप से द्विपक्षीय सममित हैंड-एक्स (हस्त-कुठार) और क्लीवर (विदारणी) से होती है।"
+            },
+            {
+                e: "Which of the following caves contain rock cut paintings dating back to the stone age era?",
+                h: "निम्नलिखित में से किस गुफा में पाषाण युग के शैल चित्र हैं?",
+                oEn: ["Barabar caves", "Bhimbetka caves", "Ajanta caves", "Ellora caves"],
+                oHi: ["बाराबार गुफाएं", "भीमबेटका गुफाएं", "अजंता गुफाएं", "एलोरा गुफाएं"],
+                a: 1,
+                sE: "Bhimbetka caves feature stone age rock art, whereas Barabar is Mauryan, and Ajanta/Ellora are classical historic rock-cut monuments.",
+                sH: "भीमबेटका की गुफाओं में पाषाण काल के शैलचित्र हैं, जबकि अजंता और एलोरा ऐतिहासिक काल की हैं।"
+            },
+            {
+                e: "The evidence of the earliest cotton cultivation in the Indus valley region is found at which site?",
+                h: "सिंधु घाटी क्षेत्र में कपास की सबसे पहली खेती का प्रमाण किस स्थल पर पाया गया है?",
+                oEn: ["Harappa", "Kalibangan", "Mehrgarh", "Rakhigarhi"],
+                oHi: ["हड़प्पा", "कालीबंगा", "मेहरगढ़", "राखीगढ़ी"],
+                a: 2,
+                sE: "Mehrgarh (in Balochistan, Pakistan) has provided the earliest known evidence of cotton cultivation in the subcontinent, dating back to circa 5000 BCE.",
+                sH: "मेहरगढ़ से लगभग 5000 ई.पू. के विश्व में कपास की खेती के प्राचीनतम साक्ष्य प्राप्त हुए हैं।"
+            },
+            {
+                e: "Which of the following metals was first used by man?",
+                h: "निम्नलिखित में से किस धातु का उपयोग मानव ने सबसे पहले किया था?",
+                oEn: ["Magnesium", "Silver", "Gold", "Copper"],
+                oHi: ["मैग्नीशियम", "चांदी", "सोना", "तांबा"],
+                a: 3,
+                sE: "Copper was the first metal manipulated and shaped by humans, marking the dawn of the Chalcolithic Age.",
+                sH: "मानव द्वारा सबसे पहले तांबे (Copper) धातु का प्रयोग किया गया था, जिससे ताम्रपाषाण युग की शुरुआत हुई।"
+            },
+            {
+                e: "When were the caves of Bhimbetka discovered?",
+                h: "भीमबेटका की गुफाओं की खोज कब हुई थी?",
+                oEn: ["1957-58", "1954-55", "1955-56", "1953-54"],
+                oHi: ["1957-58", "1954-55", "1955-56", "1953-54"],
+                a: 0,
+                sE: "The Bhimbetka rock shelters were discovered in 1957–58 by Indian archaeologist Dr. V. S. Wakankar.",
+                sH: "भीमबेटका गुफाओं की खोज 1957-58 में पुरातत्वविद् डॉ. विष्णु श्रीधर वाकणकर ने की थी।"
+            },
+            {
+                e: "Which of the following ages did NOT fall under the three main divisions of the Stone Age?",
+                h: "निम्नलिखित में से कौन सा युग पाषाण युग के तीन मुख्य विभाजनों के अंतर्गत नहीं आता था?",
+                oEn: ["Eneolithic", "Palaeolithic", "Mesolithic", "Neolithic"],
+                oHi: ["नवाश्मोत्तर कांस्य युग (Eneolithic)", "पुरापाषाण युग", "मध्यपाषाणीय युग", "नवपाषाण युग"],
+                a: 0,
+                sE: "The three classic subdivisions of the Stone Age are Palaeolithic, Mesolithic, and Neolithic. Eneolithic (Chalcolithic) is the copper-stone age.",
+                sH: "पाषाण काल के तीन मुख्य अंग हैं: पुरापाषाण, मध्यपाषाण और नवपाषाण। एनीओलिथिक (ताम्रपाषाण) धातु काल की शुरुआत है।"
+            },
+            {
+                e: "Which of the following is the correct chronological sequence of the pre-historic period of human civilization?",
+                h: "मानव गतिविधियों और सभ्यता के प्रागैतिहासिक काल का सही कालानुक्रमिक क्रम कौन-सा है?",
+                oEn: [
+                    "Palaeolithic Period, Mesolithic Period, Neolithic Period",
+                    "Mesolithic Period, Neolithic Period, Palaeolithic Period",
+                    "Metal age Period, Mesolithic Period, Palaeolithic Period",
+                    "Neolithic Period, Mesolithic Period, Palaeolithic Period"
+                ],
+                oHi: [
+                    "पुरापाषाण काल, मध्यपाषाण काल, नवपाषाण काल",
+                    "मध्यपाषाण काल, नवपाषाण काल, पुरापाषाण काल",
+                    "धातु युग काल, मध्यपाषाण काल, पुरापाषाण काल",
+                    "नवपाषाण काल, मध्यपाषाण काल, पुरापाषाण काल"
+                ],
+                a: 0,
+                sE: "Human prehistory moves chronologically from Old Stone Age (Palaeolithic) -> Middle Stone Age (Mesolithic) -> New Stone Age (Neolithic).",
+                sH: "सही ऐतिहासिक क्रम: पुरापाषाण काल -> मध्यपाषाण काल -> नवपाषाण काल है।"
+            },
+            {
+                e: "Rock shelters of Bhimbetka are famous for which of the following?",
+                h: "भीमबेटका के शैलाश्रय निम्नलिखित में से किसके लिए प्रसिद्ध हैं?",
+                oEn: [
+                    "Traces of sculpture of the Mughals",
+                    "Traces of paintings during the Maurya dynasty",
+                    "Traces of the early Dravidian period",
+                    "Earliest traces of human life on the Indian subcontinent"
+                ],
+                oHi: [
+                    "मुगलों की मूर्तिकला के निशान",
+                    "मौर्य वंश के दौरान चित्रों के निशान",
+                    "प्रारंभिक द्रविड़ काल के निशान",
+                    "भारतीय उपमहाद्वीप पर मानव जीवन के प्रारंभिक निशान"
+                ],
+                a: 3,
+                sE: "Bhimbetka holds the earliest traces of human settlement and continuous habitation on the Indian subcontinent.",
+                sH: "भीमबेटका भारतीय उपमहाद्वीप पर मानव जीवन और उनकी कलात्मक गतिविधियों के प्राचीनतम साक्ष्यों के लिए विश्व प्रसिद्ध है।"
+            },
+            {
+                e: "Ancient hominids who are placed in the category of Homo sapiens include:\nA. Ergaster line\nB. Cro-Magnon\nC. Neanderthal\nD. Proconsuls",
+                h: "निम्नलिखित में से किस प्राचीन होमिनिड को होमो सेपियंस की श्रेणी में रखा गया है?\nA. एर्गस्टर लाइन\nB. क्रो-मैग्नन\nC. निएंडरथल\nD. प्रोकोनसल्स",
+                oEn: ["D", "B", "C", "A"],
+                oHi: ["D", "B", "C", "A"],
+                a: 1,
+                sE: "Cro-Magnon represents early anatomically modern humans (Homo sapiens sapiens) in Europe.",
+                sH: "क्रो-मैग्नन (Cro-Magnon) को आधुनिक मानव यानी होमो सेपियंस की श्रेणी में वर्गीकृत किया गया है (Option B)।"
+            }
+        ];
+
+        const state = {
+            current: 0,
+            answers: new Array(QUESTIONS.length).fill(null),
+            locked: new Array(QUESTIONS.length).fill(false),
+            mode: 'test',
+            lang: 'en',
+            startTime: null,
+            timerInterval: null,
+            elapsed: 0
+        };
+
+        function $(id) { return document.getElementById(id); }
+
+        function toast(msg) {
+            const t = $('toast');
+            $('toastText').textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            return String(m).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+        }
+
+        function startApp(mode) {
+            state.mode = mode;
+            $('startScreen').classList.add('hidden');
+            $('quizApp').classList.remove('hidden');
+            state.startTime = Date.now();
+            state.timerInterval = setInterval(() => {
+                state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                $('timerText').textContent = formatTime(state.elapsed);
+            }, 1000);
+            renderQuestion();
+            buildPalette();
+        }
+
+        function toggleLang() {
+            state.lang = state.lang === 'en' ? 'hi' : 'en';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const i = state.current;
+            const q = QUESTIONS[i];
+            const isQuiz = state.mode === 'quiz';
+            const locked = state.locked[i];
+            const userAns = state.answers[i];
+            const qTxt = state.lang === 'en' ? q.e : q.h;
+            const opts = state.lang === 'en' ? q.oEn : q.oHi;
+
+            let optsHtml = '';
+            opts.forEach((opt, idx) => {
+                let cls = '', tag = '';
+                if (isQuiz && locked) {
+                    if (idx === q.a) {
+                        cls = 'correct';
+                        tag = '<span class="opt-tag">Correct</span>';
+                    }
+                    if (userAns === idx && idx !== q.a) {
+                        cls = 'wrong';
+                        tag = '<span class="opt-tag">Your Ans</span>';
+                    }
+                } else if (userAns === idx) {
+                    cls = 'selected';
+                }
+                optsHtml += `
+                    <div class="opt ${cls} ${locked ? 'locked' : ''}" onclick="selectOption(${idx})">
+                        <div class="opt-letter">${String.fromCharCode(65 + idx)}</div>
+                        <div class="opt-text">${opt}</div>
+                        ${tag}
+                    </div>
+                `;
+            });
+
+            const solTxt = state.lang === 'en' ? q.sE : q.sH;
+            let solHtml = (isQuiz && locked) ? `
+                <div class="sol-box">
+                    <div class="sol-head"><i class="fas fa-lightbulb"></i> Explanation</div>
+                    <div>${solTxt}</div>
+                </div>
+            ` : '';
+
+            $('quizMain').innerHTML = `
+                <div class="q-card">
+                    <div class="q-top">
+                        <div class="q-num-badge">Question ${i + 1} of ${QUESTIONS.length}</div>
+                        <button class="lang-btn" onclick="toggleLang()">
+                            <i class="fas fa-language"></i> ${state.lang === 'en' ? 'हिन्दी' : 'English'}
+                        </button>
+                    </div>
+                    <div class="q-text">${qTxt}</div>
+                    <div class="opts">${optsHtml}</div>
+                    ${solHtml}
+                </div>
+            `;
+
+            $('prevBtn').disabled = i === 0;
+            $('nextLabel').textContent = i === QUESTIONS.length - 1 ? 'Finish' : 'Next';
+            updatePaletteGrid();
+        }
+
+        function selectOption(idx) {
+            if (state.mode === 'quiz' && state.locked[state.current]) return;
+            state.answers[state.current] = idx;
+            if (state.mode === 'quiz') {
+                state.locked[state.current] = true;
+                if (idx === QUESTIONS[state.current].a) {
+                    toast('Correct! 🎉');
+                } else {
+                    toast('Incorrect');
+                }
+            }
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (state.current > 0) {
+                state.current--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (state.current < QUESTIONS.length - 1) {
+                state.current++;
+                renderQuestion();
+            } else {
+                openSubmitModal();
+            }
+        }
+
+        function buildPalette() {
+            const grid = $('paletteGrid');
+            grid.innerHTML = '';
+            QUESTIONS.forEach((_, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'pal-btn';
+                btn.id = 'pal-' + i;
+                btn.textContent = i + 1;
+                btn.onclick = () => {
+                    state.current = i;
+                    closePalette();
+                    renderQuestion();
+                };
+                grid.appendChild(btn);
+            });
+            updatePaletteGrid();
+        }
+
+        function updatePaletteGrid() {
+            QUESTIONS.forEach((_, i) => {
+                const btn = $('pal-' + i);
+                if (!btn) return;
+                btn.className = 'pal-btn';
+                if (i === state.current) btn.classList.add('current');
+                if (state.answers[i] !== null) btn.classList.add('answered');
+            });
+        }
+
+        function openPalette() {
+            $('paletteDrawer').classList.add('open');$('paletteOverlay').classList.add('open');
+        }
+
+        function closePalette() {
+            $('paletteDrawer').classList.remove('open');$('paletteOverlay').classList.remove('open');
+        }
+
+        function openSubmitModal() {
+            const ans = state.answers.filter(a => a !== null).length;
+            $('modalAttempted').textContent = ans;
+            $('modalUnattempted').textContent = QUESTIONS.length - ans;
+            $('submitModal').classList.add('open');
+        }
+
+        function closeSubmitModal() {
+            $('submitModal').classList.remove('open');
+        }
+
+        function confirmSubmit() {
+            closeSubmitModal();
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            let correct = 0, wrong = 0;
+            state.answers.forEach((ans, i) => {
+                if (ans !== null) {
+                    if (ans === QUESTIONS[i].a) correct++;
+                    else wrong++;
+                }
+            });
+            $('resultsInner').innerHTML = `
+                <h2>Test Completed!</h2>
+                <p style="color:var(--text-muted);margin:8px 0;">Total Time: ${formatTime(state.elapsed)}</p>
+                <div class="res-score-card">
+                    <div class="res-score-val">${correct} / ${QUESTIONS.length}</div>
+                    <div>Score</div>
+                </div>
+                <div class="res-grid">
+                    <div class="res-item"><div class="res-item-val" style="color:var(--green)">${correct}</div><div>Correct</div></div>
+                    <div class="res-item"><div class="res-item-val" style="color:var(--red)">${wrong}</div><div>Wrong</div></div>
+                </div>
+                <button class="modal-btn confirm" onclick="location.reload()">Re-attempt</button>
+            `;
+            $('resultsScreen').classList.add('open');
+        }
+    </script>
+</body>
+</html>
